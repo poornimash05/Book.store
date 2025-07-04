@@ -10,4 +10,5 @@ urlpatterns=[
     path('<str:pk>/', views.getOrderById, name='user-order'),
     path('<str:pk>/pay/', views.updateOrderToPaid, name='pay'),
     path('api/user/shipping/', user_shipping_address, name='user-shipping-address'),
+    path('send-notification/', views.send_order_notification, name='send-order-notification'),
 ]

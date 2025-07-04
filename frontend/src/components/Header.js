@@ -13,6 +13,7 @@ const Header = () => {
 
   const logoutHandler = () => {
     dispatch(logout());
+    navigate('/login'); 
   };
 
   const handleSearch = (e) => {
@@ -62,6 +63,9 @@ const Header = () => {
                 </NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/admin/orderlist">
                   Orders
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/admin/couponcreate">
+                  Create Coupon
                 </NavDropdown.Item>
               </NavDropdown>
             )}

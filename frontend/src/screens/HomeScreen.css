@@ -1,48 +1,104 @@
+/* HomeScreen.css */
+
 .home-screen-container {
-  background-color: #f4f7f9;
+  background: linear-gradient(to right, #f9f9f9, #ffffff);
+  min-height: 100vh;
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.hero-section {
-  position: relative;
-  background-image: url('https://lightwallpapers.com/downloads/library-background-Wallpapers/9.book-stack-library-room-blurred-bookshelf-background_42691-514.jpg'); /* Add your preferred image */
-  background-size: cover;
-  background-position: center;
-  color: white;
-  height: 200px; /* Adjust the height as needed */
-}
-
-.hero-section::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.4); /* Semi-transparent overlay */
-  backdrop-filter: blur(10px); /* This applies the blur effect */
-  z-index: -1; /* Makes sure the overlay is behind the content */
-}
-
-.search-bar .form-control {
-  border-radius: 25px;
-  padding-left: 15px;
-}
-
+/* Filter Sidebar */
 .filter-bar {
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  padding: 25px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 1rem;
+}
+
+.filter-bar h4 {
+  font-weight: 600;
+  color: #333;
+  font-size: 18px;
+}
+
+/* Filter Controls */
+.filter-option label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 4px;
+  display: block;
 }
 
 .filter-option select {
-  border-radius: 10px;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 100%;
+}
+
+/* Buttons */
+.filter-bar .btn-secondary {
+  background-color: #4b7bec;
+  border: none;
+  border-radius: 8px;
   padding: 10px;
+  font-weight: 500;
+  color: white;
 }
 
-.filters-col {
-  margin-top: 20px;
+.filter-bar .btn-secondary:hover {
+  background-color: #3867d6;
 }
 
-.text-center {
-  text-align: center;
+/* Headings */
+h2 {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+/* Product Cards */
+.card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border-radius: 12px !important;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive Tuning */
+@media (max-width: 768px) {
+  .filter-bar {
+    margin-bottom: 1.5rem;
+  }
+
+  .home-screen-container {
+    padding: 0.75rem;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .filter-bar h4 {
+    font-size: 16px;
+  }
+
+  .filter-option label {
+    font-size: 13px;
+  }
+
+  .filter-option select {
+    font-size: 13px;
+  }
+
+  .filter-bar .btn-secondary {
+    font-size: 14px;
+    padding: 8px;
+  }
 }

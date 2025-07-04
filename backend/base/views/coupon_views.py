@@ -49,6 +49,7 @@ def apply_coupon(request):
     
     except Coupon.DoesNotExist:
         return Response({'error': 'Invalid coupon code'}, status=status.HTTP_400_BAD_REQUEST)
+        
 @api_view(['POST'])
 @permission_classes([IsAdminUser])  # Only admin users can create coupons
 def create_coupon(request):

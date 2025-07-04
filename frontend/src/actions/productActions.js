@@ -19,45 +19,47 @@ import {
     PRODUCT_UPDATE_REQUEST,
     PRODUCT_UPDATE_SUCCESS,
     PRODUCT_UPDATE_FAIL,
+
+    PRODUCT_CREATE_REVIEW_REQUEST,
+    PRODUCT_CREATE_REVIEW_SUCCESS,
+    PRODUCT_CREATE_REVIEW_FAIL,
 } from '../constants/productConstant'
 
 export const listProducts = (
-  keyword = '',
-  classFilter = '',
-  schoolFilter = '',
-  priceSort = '',
-  minPrice = '',
-  maxPrice = '',
-  category = '',
-  type = ''
-) => async (dispatch) => {
+    keyword = '',
+    classFilter = '',
+    schoolFilter = '',
+    priceSort = '',
+    minPrice = '',
+    maxPrice = '',
+    category = '',
+    type = '',
+    pageNumber = ''
+  ) => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
 
     // Create an object to hold query parameters
     const params = {};
 
-    // Add parameters if they are not empty
     if (keyword) params.keyword = keyword;
+    if (pageNumber) params.page = pageNumber;
     if (category) params.category = category;
     if (classFilter) params.class = classFilter;
     if (schoolFilter) params.school = schoolFilter;
     if (priceSort) params.price = priceSort;
     if (minPrice && maxPrice) {
-      params.price = 'range';
-      params.min_price = minPrice;
-      params.max_price = maxPrice;
+    params.price = 'range';
+    params.min_price = minPrice;
+    params.max_price = maxPrice;
     }
     if (type) params.type = type;
 
-    // Log the params to make sure they are correct
     console.log("Params object before query string:", params);
 
-    // Convert the params object to a query string (URL encoded)
     const queryString = new URLSearchParams(params).toString();
-    console.log("Generated query string:", queryString);  // Ensure proper query string is generated
+    console.log("Generated query string:", queryString);
 
-    // Send the request with the query string
     const { data } = await axios.get(`/api/products/?${queryString}`);
 
     dispatch({
@@ -210,6 +212,45 @@ export const updateProduct = (product) => async (dispatch, getState) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_UPDATE_FAIL,
+            payload: error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message,
+        })
+    }
+}
+
+export const createProductReview = (productId, review) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: PRODUCT_CREATE_REVIEW_REQUEST
+        })
+
+        const {
+            userLogin: { userInfo },
+        } = getState()
+
+        const config = {
+            headers: {
+                'Content-type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        }
+
+        const { data } = await axios.post(
+            `/api/products/${productId}/reviews/`,
+            review,
+            config
+        )
+        dispatch({
+            type: PRODUCT_CREATE_REVIEW_SUCCESS,
+            payload: data,
+        })
+
+
+
+    } catch (error) {
+        dispatch({
+            type: PRODUCT_CREATE_REVIEW_FAIL,
             payload: error.response && error.response.data.detail
                 ? error.response.data.detail
                 : error.message,

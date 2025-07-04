@@ -50,21 +50,57 @@ class Review(models.Model):
         return str(self.rating)
 
 
+# models.py
+
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        # add more if needed
+    ]
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     paymentMethod = models.CharField(max_length=200, null=True, blank=True)
-    taxPrice = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
-    shippingPrice = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
-    totalPrice = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    
+    # ADD THESE FIELDS:
+    itemsPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    shippingPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    taxPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    totalPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)
+    
     isPaid = models.BooleanField(default=False)
     paidAt = models.DateTimeField(auto_now_add=False, null=True, blank=True)
+
     isDelivered = models.BooleanField(default=False)
     deliveredAt = models.DateTimeField(auto_now_add=False, null=True, blank=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
     createdAt = models.DateTimeField(auto_now_add=True)
     _id = models.AutoField(primary_key=True, editable=False)
 
     def __str__(self):
-        return str(self.createdAt)
+        return str(self.id)
+
+    def save(self, *args, **kwargs):
+        if self.pk:  # existing order
+            orig = Order.objects.get(pk=self.pk)
+            if orig.status != self.status:
+                super().save(*args, **kwargs)  # save updated status first
+                # Send notification on status change
+                send_fcm_notification(
+                    self.user,
+                    "Order Status Updated",
+                    f"Your order status has changed to: {self.get_status_display()}"
+                )
+                return
+        super().save(*args, **kwargs)
+
 
 
 class OrderItem(models.Model):
@@ -129,3 +165,33 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.code
+
+class FCMToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class AdminPushNotification(models.Model):
+    title = models.CharField(max_length=100)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+    def send_notification(self):
+        from .utils import send_fcm_notifications_to_tokens
+        from base.models import FCMToken
+
+        tokens = list(FCMToken.objects.values_list('token', flat=True))
+        send_fcm_notifications_to_tokens(tokens, self.title, self.message)
+
+        self.sent = True
+        self.save()
+
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.sent:
+            self.send_notification()

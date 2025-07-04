@@ -1,9 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Product, ClassFilter, Order, OrderItem, ShippingAddress, Review, SchoolFilter,Coupon
-from .models import UserShippingAddress
+from .models import (
+    Product, ClassFilter, Order, OrderItem, ShippingAddress,
+    Review, SchoolFilter, Coupon, UserShippingAddress
+)
 
+# -------------------------------
+# User Serializers
+# -------------------------------
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
@@ -21,16 +26,8 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.is_staff
 
     def get_name(self, obj):
-        name = obj.first_name
-        if name == '':
-            name = obj.email
+        return obj.first_name if obj.first_name else obj.email
 
-        return name
-
-class UserShippingAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserShippingAddress
-        fields = '__all__'
 
 class UserSerializerWithToken(UserSerializer):
     token = serializers.SerializerMethodField(read_only=True)
@@ -39,10 +36,24 @@ class UserSerializerWithToken(UserSerializer):
         model = User
         fields = ['id', '_id', 'username', 'email', 'name', 'isAdmin', 'token']
 
-    def get_token(self, obj):
-        token = RefreshToken.for_user(obj)
-        return str(token.access_token)
+    def validate(self, attrs):
+        data = super().validate(attrs)
 
+        refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        serializer = UserSerializer(self.user).data
+        for k, v in serializer.items():
+            data[k] = v
+
+        return data
+
+
+# -------------------------------
+# Product & Review Serializers
+# -------------------------------
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,7 +68,6 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
-        extra_fields = ['formatted_price']
 
     def get_reviews(self, obj):
         reviews = obj.review_set.all()
@@ -70,6 +80,9 @@ class ProductSerializer(serializers.ModelSerializer):
         except (ValueError, TypeError):
             return "₹0.00"
 
+# -------------------------------
+# Shipping Address Serializers
+# -------------------------------
 
 class ShippingAddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -77,8 +90,18 @@ class ShippingAddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserShippingAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserShippingAddress
+        fields = '__all__'
+
+# -------------------------------
+# Order Serializers
+# -------------------------------
+
 class OrderItemSerializer(serializers.ModelSerializer):
     formatted_price = serializers.SerializerMethodField()
+
     class Meta:
         model = OrderItem
         fields = '__all__'
@@ -90,16 +113,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
             return "₹0.00"
 
 
-
 class OrderSerializer(serializers.ModelSerializer):
     orderItems = serializers.SerializerMethodField(read_only=True)
     shippingAddress = serializers.SerializerMethodField(read_only=True)
     user = serializers.SerializerMethodField(read_only=True)
-
+    coupon = serializers.StringRelatedField()
     formatted_items_price = serializers.SerializerMethodField()
     formatted_shipping_price = serializers.SerializerMethodField()
     formatted_tax_price = serializers.SerializerMethodField()
     formatted_total_price = serializers.SerializerMethodField()
+
     class Meta:
         model = Order
         fields = '__all__'
@@ -111,16 +134,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_shippingAddress(self, obj):
         try:
-            address = ShippingAddressSerializer(
-                obj.shippingaddress, many=False).data
+            return ShippingAddressSerializer(obj.shippingaddress, many=False).data
         except:
-            address = False
-        return address
+            return None
 
     def get_user(self, obj):
-        user = obj.user
-        serializer = UserSerializer(user, many=False)
-        return serializer.data
+        return UserSerializer(obj.user, many=False).data
 
     def get_formatted_items_price(self, obj):
         try:
@@ -128,7 +147,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return f"₹{price:,.2f}"
         except (ValueError, TypeError):
             return "₹0.00"
-            
+
     def get_formatted_shipping_price(self, obj):
         try:
             return f"₹{float(obj.shippingPrice):,.2f}"
@@ -141,15 +160,19 @@ class OrderSerializer(serializers.ModelSerializer):
         except (ValueError, TypeError):
             return "₹0.00"
 
-
     def get_formatted_total_price(self, obj):
         try:
             return f"₹{float(obj.totalPrice):,.2f}"
         except (ValueError, TypeError):
             return "₹0.00"
 
+# -------------------------------
+# Coupon Serializer
+# -------------------------------
 
 class CouponSerializer(serializers.ModelSerializer):
+    is_active = serializers.BooleanField()
+
     class Meta:
         model = Coupon
         fields = '__all__'

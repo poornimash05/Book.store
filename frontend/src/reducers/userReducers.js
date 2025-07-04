@@ -32,6 +32,8 @@ import {
     USER_UPDATE_SUCCESS,
     USER_UPDATE_FAIL,
     USER_UPDATE_RESET,
+
+    USER_SAVE_ADDRESS,  
 } from '../constants/userConstant'
 
 
@@ -87,6 +89,14 @@ export const userDetailsReducer = (state = { user: {} }, action) => {
         case USER_DETAILS_RESET:
             return { user: {} }
 
+        case USER_SAVE_ADDRESS:
+                return {
+                    ...state,
+                    user: {
+                        ...state.user,
+                        savedAddresses: [...(state.user.savedAddresses || []), action.payload],
+                    },
+                }
 
         default:
             return state

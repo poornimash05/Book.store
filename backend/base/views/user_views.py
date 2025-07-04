@@ -8,9 +8,17 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from rest_framework import status
+from base.models import FCMToken
 
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def save_fcm_token(request):
+    token = request.data.get('token')
+    if token:
+        FCMToken.objects.update_or_create(user=request.user, defaults={'token': token})
+        return Response({'status': 'Token saved'})
+    return Response({'error': 'Token missing'}, status=400)
     
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
  def validate(self, attrs):

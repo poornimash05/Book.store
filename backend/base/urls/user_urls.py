@@ -1,6 +1,6 @@
 from django.urls import path
 from base.views import user_views as views
-
+from base.views.user_views import save_fcm_token 
 
 urlpatterns=[
     path('login/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -11,4 +11,5 @@ urlpatterns=[
     path('<str:pk>/', views.getUserById, name='user'),
     path('update/<str:pk>/', views.updateUser, name='user-update'),
     path('delete/<str:pk>/', views.deleteUser, name='user-delete'),
+    path('save-token/', views.save_fcm_token, name='save-fcm-token'),
 ]
