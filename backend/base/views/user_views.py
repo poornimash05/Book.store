@@ -15,62 +15,61 @@ from base.models import FCMToken
 @permission_classes([IsAuthenticated])
 def save_fcm_token(request):
     token = request.data.get('token')
-    if token:
-        FCMToken.objects.update_or_create(user=request.user, defaults={'token': token})
-        return Response({'status': 'Token saved'})
-    return Response({'error': 'Token missing'}, status=400)
-    
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
- def validate(self, attrs):
-        data = super().validate(attrs)
+    if not token:
+        return Response({'detail': 'Token is missing.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    FCMToken.objects.update_or_create(user=request.user, defaults={'token': token})
+    return Response({'detail': 'FCM token saved successfully.'}, status=status.HTTP_200_OK)
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
         serializer = UserSerializerWithToken(self.user).data
-        
-        for k,v in serializer.items():
-            data[k]=v
+
+        for k, v in serializer.items():
+            data[k] = v
 
         return data
-
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-# Create your views here.
 @api_view(['POST'])
 def registerUser(request):
-    data=request.data
+    data = request.data
     try:
-        user=User.objects.create(
+        user = User.objects.create(
             first_name=data['name'],
             username=data['email'],
             email=data['email'],
             password=make_password(data['password'])
         )
-        serializer=UserSerializerWithToken(user,many=False)
+        serializer = UserSerializerWithToken(user, many=False)
         return Response(serializer.data)
     except:
-        message={'detail': 'User with this email already exists'}
-        return Response(message,status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'User with this email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def updateUserProfile(request):
     user = request.user
-    serializer = UserSerializerWithToken(user, many=False)
-
     data = request.data
+
     user.first_name = data['name']
     user.username = data['email']
     user.email = data['email']
 
-    if data['password'] != '':
+    if data.get('password'):
         user.password = make_password(data['password'])
 
     user.save()
-
+    serializer = UserSerializerWithToken(user, many=False)
     return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -79,12 +78,14 @@ def getUserProfile(request):
     serializer = UserSerializer(user, many=False)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def getUsers(request):
-    users =User.objects.all()
-    serializer=UserSerializer(users, many=True)
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
@@ -93,11 +94,11 @@ def getUserById(request, pk):
     serializer = UserSerializer(user, many=False)
     return Response(serializer.data)
 
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def updateUser(request, pk):
     user = User.objects.get(id=pk)
-
     data = request.data
 
     user.first_name = data['name']
@@ -106,14 +107,13 @@ def updateUser(request, pk):
     user.is_staff = data['isAdmin']
 
     user.save()
-
     serializer = UserSerializer(user, many=False)
-
     return Response(serializer.data)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAdminUser])
 def deleteUser(request, pk):
     userForDeletion = User.objects.get(id=pk)
     userForDeletion.delete()
-    return Response('User was deleted')
+    return Response({'detail': 'User was deleted successfully.'}, status=status.HTTP_200_OK)
