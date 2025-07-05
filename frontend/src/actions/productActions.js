@@ -60,7 +60,8 @@ export const listProducts = (
     const queryString = new URLSearchParams(params).toString();
     console.log("Generated query string:", queryString);
 
-    const { data } = await axios.get(`/api/products/?${queryString}`);
+    const url = queryString ? `/api/products/?${queryString}` : `/api/products/`;
+    const { data } = await axios.get(url);
 
     dispatch({
       type: PRODUCT_LIST_SUCCESS,
