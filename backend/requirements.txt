@@ -5,3 +5,4 @@ dj-database-url
 djangorestframework
 django-cors-headers
 celery
+djangorestframework-simplejwt
