@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -29,24 +30,26 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.first_name if obj.first_name else obj.email
 
 
-class UserSerializerWithToken(UserSerializer):
-    token = serializers.SerializerMethodField(read_only=True)
+class UserSerializerWithToken(TokenObtainPairSerializer):  # ✅ FIXED LINE
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
 
-    class Meta:
-        model = User
-        fields = ['id', '_id', 'username', 'email', 'name', 'isAdmin', 'token']
+        # Add extra claims
+        token['username'] = user.username
+        token['email'] = user.email
+        token['isAdmin'] = user.is_staff
+
+        return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        refresh = self.get_token(self.user)
+        user = self.user
+        serializer = UserSerializer(user).data
 
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
-
-        serializer = UserSerializer(self.user).data
-        for k, v in serializer.items():
-            data[k] = v
+        for key, value in serializer.items():
+            data[key] = value
 
         return data
 
