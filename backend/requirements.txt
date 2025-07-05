@@ -6,3 +6,4 @@ djangorestframework
 django-cors-headers
 celery
 djangorestframework-simplejwt
+firebase-admin
