@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from '../utils/axiosInstance';
 import {
     CART_ADD_ITEM,
     CART_REMOVE_ITEM,
