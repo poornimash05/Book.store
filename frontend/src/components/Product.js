@@ -6,9 +6,12 @@ import './ProductCard.css'
 
 function Product({ product }) {
   // Construct image URL safely
-  const imageUrl = product.image?.startsWith('http')
+  const imgUrl = product.image.startsWith('http')
+  ? product.image
+  : product.image.startsWith('/')
     ? product.image
-    : `${process.env.REACT_APP_API_URL}${product.image}`;
+    : `/images/${product.image}`;
+
 
   return (
     <Card className="my-3 p-3 rounded shadow-sm border-0 book-card h-100">
