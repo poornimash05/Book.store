@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from '../utils/axiosInstance';
 import {
     PRODUCT_LIST_REQUEST,
     PRODUCT_LIST_SUCCESS,
