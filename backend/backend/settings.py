@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-!^i80+e*%p##bu29(em2$5$#%)n3&ml!dkj&eryyj_)w8^u*oi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['your-backend-name.onrender.com']
 
 
 # Application definition
@@ -81,8 +81,8 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -163,11 +163,12 @@ MEDIA_URL= '/images/'
 STATICFILES_DIRS=[
     BASE_DIR / 'static'
 ]
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 MEDIA_ROOT = 'static/images'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+# WhiteNoise Settings
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
