@@ -5,19 +5,16 @@ import Rating from './Rating'
 import './ProductCard.css'
 
 function Product({ product }) {
-  // Construct image URL safely
-  const imgUrl = product.image.startsWith('http')
-  ? product.image
-  : product.image.startsWith('/')
+  // 🔧 Ensure image path resolves correctly from `static/images/`
+  const imageUrl = product.image?.startsWith('http')
     ? product.image
-    : `/images/${product.image}`;
-
+    : `/images/${product.image?.replace(/^.*[\\/]/, '')}`;  // removes any folders like 'products/' from image name
 
   return (
     <Card className="my-3 p-3 rounded shadow-sm border-0 book-card h-100">
       <Link to={`/product/${product._id}`}>
         <Card.Img
-          src={product.image}
+          src={imageUrl}
           variant="top"
           className="book-img"
           alt={product.name}
