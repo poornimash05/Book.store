@@ -3,6 +3,7 @@
   "proxy": "http://127.0.0.1:8000",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://prismatic-toffee-7e0be3.netlify.app", 
   "dependencies": {
     "@paypal/react-paypal-js": "^8.8.3",
     "@testing-library/dom": "^10.4.0",
