@@ -26,20 +26,19 @@ import {
 } from '../constants/productConstant'
 
 export const listProducts = (
-    keyword = '',
-    classFilter = '',
-    schoolFilter = '',
-    priceSort = '',
-    minPrice = '',
-    maxPrice = '',
-    category = '',
-    type = '',
-    pageNumber = ''
-  ) => async (dispatch) => {
+  keyword = '',
+  classFilter = '',
+  schoolFilter = '',
+  priceSort = '',
+  minPrice = '',
+  maxPrice = '',
+  category = '',
+  type = '',
+  pageNumber = ''
+) => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
 
-    // Create an object to hold query parameters
     const params = {};
 
     if (keyword) params.keyword = keyword;
@@ -48,11 +47,13 @@ export const listProducts = (
     if (classFilter) params.class = classFilter;
     if (schoolFilter) params.school = schoolFilter;
     if (priceSort) params.price = priceSort;
+
     if (minPrice && maxPrice) {
-    params.price = 'range';
-    params.min_price = minPrice;
-    params.max_price = maxPrice;
+      params.price = 'range';
+      params.min_price = minPrice;
+      params.max_price = maxPrice;
     }
+
     if (type) params.type = type;
 
     console.log("Params object before query string:", params);
@@ -61,23 +62,27 @@ export const listProducts = (
     console.log("Generated query string:", queryString);
 
     const url = queryString ? `/api/products/?${queryString}` : `/api/products/`;
+
     const { data } = await axios.get(url);
 
     dispatch({
       type: PRODUCT_LIST_SUCCESS,
       payload: data,
     });
+
   } catch (error) {
-    console.error("Error in fetching products:", error); // Log error for further inspection
+    console.error("Error in fetching products:", error.response?.data || error.message);
 
     dispatch({
       type: PRODUCT_LIST_FAIL,
-      payload: error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
     });
   }
 };
+
 
 
 export const listProductDetails = (id) => async (dispatch) => {
