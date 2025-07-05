@@ -5,7 +5,7 @@ from django.conf import settings
 
 # Dynamically build the absolute path to the Firebase JSON file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of this utils.py file
-firebase_path = os.path.join(BASE_DIR, 'firebase-service-account.json')
+firebase_path = os.path.join(BASE_DIR, 'base/firebase-service-account.json')
 
 # Initialize Firebase app once (only if not already initialized)
 if not firebase_admin._apps:
