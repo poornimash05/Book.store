@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from '../utils/axiosInstance';
 import {
   USER_LOGIN_REQUEST,
   USER_LOGIN_SUCCESS,
