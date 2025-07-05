@@ -88,7 +88,10 @@ export const login = (email, password) => async (dispatch) => {
     console.log('LOGIN ERROR:', error.response?.data)
     dispatch({
       type: USER_LOGIN_FAIL,
-      payload: error.response?.data?.detail || error.message,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
     })
     toast.error('Invalid email or password')
   }
