@@ -29,15 +29,38 @@ import axios from 'axios';
 
 function App() {
   useEffect(() => {
-    requestPermissionAndToken().then(token => {
-      if (token) {
-        console.log('FCM Token:', token);
-        axios.post('/api/save-token/', { token });
-      }
-    });
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
-    onMessageListener().then(payload => {
-      console.log('Received in foreground:', payload);
+    requestPermissionAndToken()
+      .then((token) => {
+        if (token && userInfo?.token) {
+          console.log('FCM Token:', token);
+
+          axios
+            .post(
+              '/api/save-token/',
+              { token },
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${userInfo.token}`, // 🔐 JWT token required
+                },
+              }
+            )
+            .then((res) => {
+              console.log('✅ FCM token saved:', res.data);
+            })
+            .catch((err) => {
+              console.error('❌ Error saving FCM token:', err.response?.data || err.message);
+            });
+        }
+      })
+      .catch((err) => {
+        console.error('❌ Permission/token error:', err);
+      });
+
+    onMessageListener().then((payload) => {
+      console.log('📩 FCM Received in foreground:', payload);
       alert(`${payload.notification.title}: ${payload.notification.body}`);
     });
   }, []);
