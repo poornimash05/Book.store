@@ -50,15 +50,16 @@ export const saveFcmToken = (fcmToken) => async (dispatch) => {
     const token = getToken()
 
     await axios.post(
-      '/api/save-token/',
+      `${process.env.REACT_APP_API_URL}/api/users/save-token/`,
       { token: fcmToken },
-      {
+      {   
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
-      }
+      },
+     }  
     )
+
     console.log('✅ FCM token saved successfully')
   } catch (error) {
     console.error('❌ Error saving FCM token:', error.response?.data || error.message)
