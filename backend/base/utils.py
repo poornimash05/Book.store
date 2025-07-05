@@ -1,17 +1,18 @@
 import os
+import json
 import firebase_admin
 from firebase_admin import credentials, messaging
 from django.conf import settings
 
-# Dynamically build the absolute path to the Firebase JSON file
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of this utils.py file
-firebase_path = os.path.join(BASE_DIR, 'base/firebase-service-account.json')
+# ✅ Use Firebase service account from environment variable
+firebase_json = os.environ.get('FIREBASE_CREDENTIALS_JSON')
 
-# Initialize Firebase app once (only if not already initialized)
-if not firebase_admin._apps:
-    cred = credentials.Certificate(firebase_path)
-    firebase_admin.initialize_app(cred)
-
+if firebase_json and not firebase_admin._apps:
+    try:
+        cred = credentials.Certificate(json.loads(firebase_json))
+        firebase_admin.initialize_app(cred)
+    except Exception as e:
+        print("Firebase initialization error:", e)
 
 def send_fcm_notification(user, title, message):
     from .models import FCMToken
